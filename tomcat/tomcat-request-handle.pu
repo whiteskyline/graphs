@@ -1,0 +1,62 @@
+@startuml
+
+title Tomcat协议层处理流程
+
+actor Client as Cl
+control JIoEndpoint as Je
+control JIoEndpoint.Acceptor as Ac
+control Http11Protocol.Http11ConnectionHandler as Hch
+control Http11Processor as Hp
+control InternalInputBuffer as Ib
+control CoyoteAdapter as Ca
+
+Cl -> Ac: http request
+note right
+  accept request in Acceptor thread
+  thread named http-{port}-Acceptor-*
+  socket is fetched  by serverSocketFactory.accepsSocket
+end note
+activate Ac
+
+Ac -> Ac: processSocket(socket)
+Ac -> Ac: getWorkerThraed()
+note right
+  processSocket just get executor for SocketProcessor
+  executor could be worker from WorkerStack or executor
+end note
+
+Ac -> Hch: process(socket)
+note right
+  Http11ConnectionHandler create Http11Processor
+  and process the connection
+end note
+Hch -> Hp: process(socket)
+note right
+  设置timeout等内容
+  设置inputStream,outputStream
+  paseRequestLine
+  parseHeaders
+end note
+Hp -> Ib: parseRequestRequestLine
+Hp <- Ib
+Hp -> Ib: parseHeaders
+Hp <- Ib
+Hp -> Hp: prepareRequest
+note right
+  获取协议版本
+  获取方法名称
+  获取关于连接和该连接是否需要特殊处理的头部
+  获取URI等内容
+  Content-Length等内容
+  Host头部
+end note
+
+Hp -> Ca: service(request, response)
+Hp <- Ca
+
+Hch <- Hp
+note right
+  所以在协议层处理的时候，其处理的线程有多个
+end note
+
+@enduml

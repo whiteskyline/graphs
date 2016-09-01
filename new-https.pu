@@ -1,0 +1,22 @@
+@startuml
+
+'graph global setting'
+autonumber
+title 新版本刷新HTTPS列表
+
+'define components'
+actor Client as C
+
+boundary "Relocation-Interceptor" as RI
+control "Service-FE" as SF
+control "Relocation-FE" as RF
+'end of define components'
+
+'redirect request procedure'
+C -> RI: Normal Request
+C <-- RI: Redirect Response
+
+C -> RF: Refresh HostList
+C <-- RF: HostList
+
+@enduml

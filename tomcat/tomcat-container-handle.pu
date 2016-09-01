@@ -1,0 +1,51 @@
+@startuml
+
+control Http11Processor as Hp
+control CoyoteAdapter as Ca
+control StandardPipeline as Sp
+
+control StandardEngineValve as Sea
+control ErrorReportValve as Erv
+control StandardHostValve as Shv
+control StandardContextValve as Scv
+
+Hp -> Ca: service(req, resp)
+note right
+  设置正确的request, response对象
+  postParseRequest(修正Path的编码)
+  获取Connector中的mapper对象，并且对于请求设置正确的Mapper, Context
+  由谁处理在这里已经确定
+end note
+Ca -> Ca: postParseRequest(req, resp)
+Ca -> Ca: map(host< uri, mappingData)
+Ca -> Ca: internalMap(host, uri, mappingData)
+note right
+  进行context -> exactWrappers -> wildcardWrappers -> extension -> welcome files的匹配
+end note
+Ca -> Sp: getPipeline().getFirst().invoke(request, response)
+note right
+  在这里进入了责任链的犯愁，下面表示的是整个Pipeline的组成, Pipeline的每个节点称作Valve
+end note
+
+Ca -> Sea: invoke(req, resp)
+note right
+  检查Host是否正确设置
+end note
+
+Sea -> Erv: invoke(req, resp)
+note right
+  这里先进行责任链往下调用，然后再进行后面的错误的记录
+end note
+
+Erv -> Shv: invoke(req, resp)
+note right
+  获取Context, 并且设置好ClassLoader
+end note
+
+Shv -> Scv: invoke(req, resp)
+note right
+  过滤禁止访问的部分
+end note
+
+
+@enduml

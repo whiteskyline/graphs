@@ -1,0 +1,14 @@
+@startuml
+
+class JIoEndpoint {
+  serverSocketFactory: DefaultServerSocketFactory
+  serverSocket: ServerSocket
+}
+
+class Acceptor {
+  run(): void
+}
+
+JIoEndpoint +-- Acceptor
+
+@enduml

@@ -1,0 +1,83 @@
+@startuml
+
+'define components'
+actor Client as C
+
+boundary "Relocation-Interceptor" as RI
+control "Service-FE" as SF
+control "Relocation-FE" as RF
+'end of define components'
+
+title 旧Redirect过程
+
+'redirect request procedure'
+C -> RI: Normal Request
+activate RI
+alt No Redirect
+RI -> SF: normal request
+activate SF
+RI <-- SF: normal response
+deactivate SF
+C <-- RI: normal response
+else Redirect
+note right of RI: is Permanent
+RI --> C: Redirect Response
+deactivate RI
+end
+
+C -> RF: Refresh HostList
+activate RF
+C <-- RF: HostList
+note right of RF
+{ "result":"ok",
+  "description":"成功",
+  "data":{ "dataCenter":"US_OREGON",
+           "hostList":{
+              "phonecallapi.micloud.xiaomi.net":"us.phonecallapi.micloud.xiaomi.net",
+              "statusapi.micloud.xiaomi.net":"us.statusapi.micloud.xiaomi.net"
+            }
+          },
+  "code":0,
+  "retriable":false }
+end note
+deactivate RF
+'end of redirect request procedure'
+
+newpage 新HTTPS-Redirect过程
+
+'redirect request procedure'
+note left of C
+add Header X-XIAOMI-SUPPORT-REDIRECT: true, https
+end note
+C -> RI: Normal Request
+alt No Redirect
+RI -> SF: Normal Request
+RI <-- SF: Normal Response
+C <-- RI: Normal Response
+else
+note right of RI: is Permanent
+C <-- RI: Redirect Response
+end
+
+note left of C
+add Header X-XIAOMI-SUPPORT-REDIRECT: true, https
+end note
+
+C -> RF: Refresh HostList
+activate RF
+C <-- RF: HostList
+note right of RF
+{ "result":"ok",
+  "description":"成功",
+  "data":{ "dataCenter":"US_OREGON",
+           "hostList":{
+              "phonecallapi.micloud.xiaomi.net":"https://us.phonecallapi.micloud.xiaomi.net",
+              "statusapi.micloud.xiaomi.net":"http://us.statusapi.micloud.xiaomi.net"
+            }
+          },
+  "code":0,
+  "retriable":false }
+end note
+deactivate RF
+
+@enduml

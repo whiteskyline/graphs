@@ -1,0 +1,46 @@
+'author:  minghorizon@gmail.com'
+'company: xiaomi.com'
+'desc:    描述执行服务的内容'
+@startuml
+
+'start of define components'
+actor Client as C
+boundary ExecutorService as ExeS
+control QueueService as QueS
+control ExecutorPool as ExeP
+control EnvironmentService as EnvS
+'end of define components'
+
+title Job运转流程
+
+'define put job'
+C -> ExeS: put Job
+activate ExeS
+
+ExeS -> QueS: put Job
+activate QueS
+ExeS <- QueS: Job ID
+deactivate QueS
+
+C <- ExeS: Job ID
+deactivate ExeS
+'end of define put job'
+
+'define get job from queue'
+ExeS -> QueS: get Job
+activate ExeS
+activate QueS
+ExeS <- QueS: Job Info
+deactivate QueS
+ExeS -> EnvS: prepare environment
+ExeS -> ExeP: run job
+deactivate ExeS
+'end of get job from queue'
+
+'define run job'
+activate ExeP
+ExeS <- ExeP: job callback, result
+activate ExeS
+deactivate ExeP
+
+@enduml

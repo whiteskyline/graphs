@@ -1,0 +1,57 @@
+'author:  minghorizon@gmail.com'
+'company: xiaomi.com'
+'desc:    描述类以及类之间的关系'
+
+@startuml
+
+'define models'
+
+enum Status {
+  waiting,
+  running,
+  finished
+}
+
+class JobResult {
+  jobId: String
+  runningCost: Long
+  success: Boolean,
+  stauts: Status
+}
+
+class Job {
+  jobId: String
+  exec:  String
+  fileContent: String
+}
+
+class QueueInfo {
+  id: String
+  content: Object
+}
+
+'end of define models'
+
+'define interfaces'
+class ExecutorService {
+  String putJob()
+  JobResult getJobStatus()
+}
+
+class QueueService {
+  String put()
+  QueueInfo get()
+}
+
+class EnvironmentService {
+  EnvironmentService(pathList: Array[String])
+  void prepareEnv(targetPath)
+}
+
+class ExecutorPool {
+  JobResult runJob(Job job, String rootPath)
+}
+
+'end of define interfaces'
+
+@enduml
