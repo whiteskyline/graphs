@@ -8,6 +8,7 @@ control StandardEngineValve as Sea
 control ErrorReportValve as Erv
 control StandardHostValve as Shv
 control StandardContextValve as Scv
+control StandardWrapperValve as Swv
 
 Hp -> Ca: service(req, resp)
 note right
@@ -45,6 +46,15 @@ end note
 Shv -> Scv: invoke(req, resp)
 note right
   过滤禁止访问的部分
+  检查Wrapper是否已经找到
+  调用相应的EventListener
+end note
+
+Scv -> Swv: invoke(req, resp)
+note right
+  创建FilterChain, FilterChain最后是Servlet
+  使用FilterChain对请求进行处理
+  FilterChain的内部是一个Filter的数组对其进行处理
 end note
 
 
