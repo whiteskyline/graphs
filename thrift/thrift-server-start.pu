@@ -1,0 +1,35 @@
+@startuml
+
+control User as Us
+control ThriftServiceRunnber as Tsr
+control ThriftUtil as Tu
+control ZKClient as Zc
+control IThriftInstanceProvider as Itip
+control TServerSocket as Tss
+control TServer as Ts
+
+Us -> Tsr: startThriftServer
+
+Tsr -> Tu: getServiceDefinitionClassName
+Tsr <- Tu
+
+Tsr -> Tu: getThriftZKPath
+Tsr <- Tu
+
+Tsr -> Tsr: loadZKConfigurationToSystemProperties
+
+Tsr -> Tsr: startThriftServerImpl
+Tsr -> Itip: getInstance
+Tsr -> Tsr: getTProcessInstance
+note right
+通过反射获取Processor实例
+end note
+
+Tsr -> Tss: new TServerSocket
+Tsr -> Ts:  new TServer
+
+Tsr -> Ts: serve(in another thread)
+
+Tsr -> Zc: registerZKNode
+
+@enduml
