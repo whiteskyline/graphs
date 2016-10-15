@@ -1,0 +1,68 @@
+@startuml
+
+package "Client Codes" {
+  component "WifiSyncManager" as manager
+}
+
+package "Generated Codes" {
+  component "WifiServiceV3" as service
+  manager -down-> service
+}
+
+package "Sdk-Base" {
+  interface "Request Interface" as requestor
+  service -down-> requestor
+  requestor -down-> PreRequestChain
+  note right
+    PreRequestChain is created with ChainFactory br reflect
+  end note
+
+  folder "PreRequestChain" {
+    interface "RelocationChainNode" as relNode
+    interface "PassportChainNode" as pasNode
+    interface "TraceChainNode" as traNode
+    interface "NetworkChainNode" as netNode
+    relNode -down-> pasNode
+    pasNode -down-> traNode
+    traNode -down-> netNode
+  }
+
+  component RequestorFactory
+  note left
+    created with reflect
+  end note
+
+}
+
+package "Test-Adapter" {
+  component RequestorFactoryTest
+  folder "ChainImpl" {
+    interface "RelocationChainNodeImpl"
+    interface "PassportChainNodeImpl"
+    interface "TraceChainNodeImpl"
+    interface "NetworkChainNodeImpl"
+    RelocationChainNodeImpl -down-> PassportChainNodeImpl
+    PassportChainNodeImpl -down-> TraceChainNodeImpl
+    TraceChainNodeImpl -down-> NetworkChainNodeImpl
+  }
+
+  RequestorFactoryTest -> ChainImpl
+}
+
+package "Android-Adapter" {
+  component RequestorFactoryAndroid
+  RequestorFactory .right.> RequestorFactoryAndroid
+  folder "ChainAndroidImpl" {
+    interface "RelocationChainNodeAndroidImpl"
+    interface "PassportChainNodeAndroidImpl"
+    interface "TraceChainNodeAndroidImpl"
+    interface "NetworkChainNodeAndroidImpl"
+    RelocationChainNodeAndroidImpl -down-> PassportChainNodeAndroidImpl
+    PassportChainNodeAndroidImpl -down-> TraceChainNodeAndroidImpl
+    TraceChainNodeAndroidImpl -down-> NetworkChainNodeAndroidImpl
+  }
+
+  RequestorFactoryAndroid -> ChainAndroidImpl
+}
+
+@enduml

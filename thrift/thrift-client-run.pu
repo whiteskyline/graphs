@@ -1,0 +1,18 @@
+@startuml
+
+control User as Us
+control AlwaysCreateClientProxy as Accp
+control ThriftClientPool as Tcp
+control ThriftClientPoolFactory as Tcpf
+control ClientConfigs as Cc
+control EndpointChooser as Ec
+
+Us -> Accp: invoke(proxy, method, args)
+Accp -> Cc: getEndpointPool(ifaceClass, type)
+Accp <- Cc: EndpointPool
+Accp -> Ec: choose(endpointList)
+Accp -> Accp: borrowClient
+Accp <- Accp: TClient
+Accp -> Method: invoke(tclient, args)
+
+@enduml

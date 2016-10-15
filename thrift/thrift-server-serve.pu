@@ -1,0 +1,50 @@
+@startuml
+
+control THsHaServer as Thhs
+control TServerTransport as Tst
+control TNonblockingServer.SelectThread as St
+
+control SelectorProvider as Sp
+control Selector as S
+
+control TNonblockingServer.FrameBuffer as Fb
+control TProcessor as Tp
+
+Thhs -> Thhs: startListening
+Thhs -> Tst: listen
+Thhs -> Thhs: startSelectorThread
+Thhs -> St: constructor
+St -> Sp: openSelector
+St <- Sp: Selector
+St -> Tst: registerSelector(selector)
+
+St -> St: run()
+St -> St: select()
+St -> S: select()
+St -> S: selectedKeys().iterator()
+St <- S: Iterator<SelectionKey>
+St -> St: handleWrite/Read/Accept
+note right
+相关的处理是通过NIO完成的，当FrameBuffer的请求全部读取完之后
+将调用TNonblockingServer.invokeRequest进行请求后部的处理
+end note
+
+St -> Fb: invoke()
+note right
+  获取这个Key上面的InputTransport
+  获取inputProtocol, 获取outputProtocol
+end note
+
+Fb -> Fb: responseReady()
+
+Fb -> Tp: process(inProt, outProt)
+note right
+  这里的processor是通过TProcessorFactory获得的，因此其可以
+  就是一个具体生成的Service中Processor的对象
+  这个Process中，一般负责从protocol获取已经可以的消息头，消息内容，并且调用相关的方法
+  最后往protocol中写入相应的东西
+end note
+St -> St: processInterestChanges()
+
+
+@enduml

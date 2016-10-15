@@ -27,6 +27,10 @@ end note
 
 Tsr -> Tss: new TServerSocket
 Tsr -> Ts:  new TServer
+note right
+根据支持的协议，分为IAuth
+THsHaServer等,我们这里关注THsHaServer的实现
+end note
 
 Tsr -> Ts: serve(in another thread)
 

@@ -1,0 +1,33 @@
+@startuml
+
+control User as Us
+control ClientFactory as Cf
+control FactoryInfo as Fi
+control ClientProxyFactory as Cpf
+control ClientProxy as Cp
+control ClientConfigs as Cc
+
+Us -> Cf: getClient
+Cf -> Cf: getFactoryInfo(clazz)
+note right
+factory info中包含了Iface到具体ClientClass的信息
+end note
+Cf -> Fi: getClient(timeout)
+note right
+
+end note
+
+Fi -> Fi: createClient(timeout, endpointChooser, endpointConfig, clientProxyFactory)
+Fi -> Cpf: createClientProxy()
+Fi <- Cpf: clientProxy
+note right
+ClientProxyFactory default DefaultClientProxyFactory
+end note
+Fi -> Cp: init(ifaceClazz, clientClazz, timeout, chooser, clientEndpointConfig)
+Cp -> Cc: getConfig
+note right
+当没有传入EndpointConfig的时候，就直接去ClientConfigs, 这个取得是Zk中的
+end note
+Cf <- Cf: client
+
+@enduml
